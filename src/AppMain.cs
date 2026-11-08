@@ -148388,6 +148388,7 @@ public class AppMain
 		}
 	}
 
+	private const float FAR_2DBG_SCALE = 1.5f;
 	private static void gmMapFarSceneObjFuncDraw2DBG(OBS_OBJECT_WORK pWork)
 	{
 		OBS_ACTION3D_NN_WORK obj_3d = pWork.obj_3d;
@@ -148457,6 +148458,11 @@ public class AppMain
 				nnTranslateMatrix(obj_3d.user_obj_mtx, obj_3d.user_obj_mtx, 250f, -70f, -50f);
 			}
 			break;
+		}
+		// FAR_2DBG_SCALE: escala del fondo 2D lejano. 1f = original. Sin probar en el teléfono.
+		if (FAR_2DBG_SCALE != 1f)
+		{
+			nnScaleMatrix(obj_3d.user_obj_mtx, obj_3d.user_obj_mtx, FAR_2DBG_SCALE, FAR_2DBG_SCALE, FAR_2DBG_SCALE);
 		}
 		ObjDrawAction3DNN(pWork.obj_3d, pWork.pos, pWork.dir, pWork.scale, ref pWork.disp_flag);
 	}
