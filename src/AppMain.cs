@@ -97373,6 +97373,17 @@ public class AppMain
 		limit_setting.limit_rect[2] = (oBS_OBJECT_WORK.pos.x >> 12) + eve_rec.left * 2 + eve_rec.width * 2;
 		limit_setting.limit_rect[1] = (oBS_OBJECT_WORK.pos.y >> 12) + eve_rec.top * 2;
 		limit_setting.limit_rect[3] = (oBS_OBJECT_WORK.pos.y >> 12) + eve_rec.top * 2 + eve_rec.height * 2;
+		// Los límites de cámara del nivel están pensados para 480 px. En ultrawide la vista es más ancha y la cámara
+		// se queda pegada a ese rectángulo: se amplía a izquierda y derecha la mitad del exceso de ancho.
+		if (CAM_LIMIT_WIDE_EXPAND)
+		{
+			int wideExtra = Sonic4Ep1.RENDER_W - Sonic4Ep1.GAME_W;
+			if (wideExtra > 0)
+			{
+				limit_setting.limit_rect[0] -= wideExtra / 2;
+				limit_setting.limit_rect[2] += wideExtra / 2;
+			}
+		}
 		if (eve_rec.id == 302)
 		{
 			oBS_OBJECT_WORK.ppFunc = gmGmkCamScrLimitSetting;
@@ -148293,6 +148304,7 @@ public class AppMain
 	// Zoom del fondo lejano de Casino Street (zona 2): el skyline es un modelo de ancho fijo y en ultrawide
 	// deja los laterales vacios. Se acerca solo ese fondo (fovy mas cerrado, zoom uniforme), sin cambiar la camara
 	// del nivel. Con pantalla estrecha (aspecto <= CASINO_FAR_BASE_ASPECT) no cambia nada.
+	public const bool CAM_LIMIT_WIDE_EXPAND = true;
 	public const float CASINO_FAR_BASE_ASPECT = 1.0333f;
 	public const bool CASINO_FAR_ZOOM_ENABLED = true;
 	// Desplazamiento horizontal del fondo en unidades NDC (1 = medio ancho de pantalla). Positivo = hacia la izquierda.
