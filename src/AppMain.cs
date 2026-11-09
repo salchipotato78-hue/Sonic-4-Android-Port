@@ -148290,9 +148290,33 @@ public class AppMain
 		gMS_MAP_FAR_CAMERA.camera_type = camera_type;
 	}
 
+	// Zoom del fondo lejano de Casino Street (zona 2): el skyline es un modelo de ancho fijo y en ultrawide
+	// deja los laterales vacios. Se acerca solo ese fondo (fovy mas cerrado, zoom uniforme), sin cambiar la camara
+	// del nivel. Con pantalla estrecha (aspecto <= CASINO_FAR_BASE_ASPECT) no cambia nada.
+	public const float CASINO_FAR_BASE_ASPECT = 1.1667f;
+	public const bool CASINO_FAR_ZOOM_ENABLED = true;
+
 	private static void gmMapFarCameraApply()
 	{
 		GMS_MAP_FAR_CAMERA gMS_MAP_FAR_CAMERA = gmMapFarCameraGetInfo();
+		float farZoom = 1f;
+		if (CASINO_FAR_ZOOM_ENABLED && gmMapFarGetZoneType(gmMapFarGetStageId()) == 1)
+		{
+			farZoom = Math.Max(1f, AMD_SCREEN_ASPECT / CASINO_FAR_BASE_ASPECT);
+		}
+		OBS_CAMERA farCam = ObjCameraGet(gMS_MAP_FAR_CAMERA.camera_id);
+		if (farZoom > 1f && farCam != null)
+		{
+			// Guarda la proyección original, la reemplaza por una con fovy más cerrado para esta pasada
+			// y la restaura: el comando de dibujo copia la matriz al registrarse.
+			NNS_MATRIX saved = GlobalPool<NNS_MATRIX>.Alloc();
+			saved.Assign(farCam.prj_pers_mtx);
+			nnMakePerspectiveMatrix(farCam.prj_pers_mtx, (int)(farCam.fovy / farZoom), farCam.aspect, farCam.znear, farCam.zfar);
+			ObjDraw3DNNSetCamera(gMS_MAP_FAR_CAMERA.camera_id, gMS_MAP_FAR_CAMERA.camera_type);
+			farCam.prj_pers_mtx.Assign(saved);
+			GlobalPool<NNS_MATRIX>.Release(saved);
+			return;
+		}
 		ObjDraw3DNNSetCamera(gMS_MAP_FAR_CAMERA.camera_id, gMS_MAP_FAR_CAMERA.camera_type);
 	}
 
