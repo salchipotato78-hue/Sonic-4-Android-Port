@@ -148293,8 +148293,10 @@ public class AppMain
 	// Zoom del fondo lejano de Casino Street (zona 2): el skyline es un modelo de ancho fijo y en ultrawide
 	// deja los laterales vacios. Se acerca solo ese fondo (fovy mas cerrado, zoom uniforme), sin cambiar la camara
 	// del nivel. Con pantalla estrecha (aspecto <= CASINO_FAR_BASE_ASPECT) no cambia nada.
-	public const float CASINO_FAR_BASE_ASPECT = 1.1667f;
+	public const float CASINO_FAR_BASE_ASPECT = 1.0333f;
 	public const bool CASINO_FAR_ZOOM_ENABLED = true;
+	// Desplazamiento horizontal del fondo en unidades NDC (1 = medio ancho de pantalla). Positivo = hacia la izquierda.
+	public const float CASINO_FAR_SHIFT_X = 0.12f;
 
 	private static void gmMapFarCameraApply()
 	{
@@ -148312,6 +148314,8 @@ public class AppMain
 			NNS_MATRIX saved = GlobalPool<NNS_MATRIX>.Alloc();
 			saved.Assign(farCam.prj_pers_mtx);
 			nnMakePerspectiveMatrix(farCam.prj_pers_mtx, (int)(farCam.fovy / farZoom), farCam.aspect, farCam.znear, farCam.zfar);
+			// Desplaza el fondo hacia la izquierda (offset del lente, sin zoom extra) para tapar el borde izquierdo del skyline.
+			farCam.prj_pers_mtx.M20 = CASINO_FAR_SHIFT_X;
 			ObjDraw3DNNSetCamera(gMS_MAP_FAR_CAMERA.camera_id, gMS_MAP_FAR_CAMERA.camera_type);
 			farCam.prj_pers_mtx.Assign(saved);
 			GlobalPool<NNS_MATRIX>.Release(saved);
