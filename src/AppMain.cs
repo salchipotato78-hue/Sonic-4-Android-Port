@@ -141299,7 +141299,7 @@ public class AppMain
 		float num2 = (float)(GSD_DISP_HEIGHT / 2) * oBS_CAMERA.scale;
 		float num3 = (float)g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * oBS_CAMERA.scale;
 		oBS_CAMERA.pos.x = FXM_FX32_TO_FLOAT(pos_x);
-		if (oBS_CAMERA.pos.x < num)
+		if (!DISABLE_SCROLL_LIMITS && oBS_CAMERA.pos.x < num)
 		{
 			oBS_CAMERA.pos.x = num;
 		}
@@ -141846,11 +141846,11 @@ public class AppMain
 		float num3 = (float)g_gm_main_system.map_fcol.right - GmCamHalfWidth() * obj_camera.scale;
 		float num4 = (float)g_gm_main_system.map_fcol.top + (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		float num5 = (float)g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
-		if (obj_camera.disp_pos.x < num2)
+		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x < num2)
 		{
 			obj_camera.disp_pos.x = num2;
 		}
-		if (obj_camera.disp_pos.x > num3)
+		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x > num3)
 		{
 			obj_camera.disp_pos.x = num3;
 		}
@@ -148305,6 +148305,9 @@ public class AppMain
 	// deja los laterales vacios. Se acerca solo ese fondo (fovy mas cerrado, zoom uniforme), sin cambiar la camara
 	// del nivel. Con pantalla estrecha (aspecto <= CASINO_FAR_BASE_ASPECT) no cambia nada.
 	public const bool CAM_LIMIT_WIDE_EXPAND = true;
+	// EXPERIMENTO: true quita los topes horizontales de la cámara (límites de scroll en X).
+	// Si el jugador deja de pararse en los laterales, el origen es la cámara. Poner false para volver al comportamiento original.
+	public const bool DISABLE_SCROLL_LIMITS = true;
 	public const float CASINO_FAR_BASE_ASPECT = 1.0333f;
 	public const bool CASINO_FAR_ZOOM_ENABLED = true;
 	// Desplazamiento horizontal del fondo en unidades NDC (1 = medio ancho de pantalla). Positivo = hacia la izquierda.
