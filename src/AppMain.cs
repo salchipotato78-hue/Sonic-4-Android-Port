@@ -80085,6 +80085,12 @@ public class AppMain
 		int num2 = pos_y >> 3;
 		int num3 = num >> 3;
 		int num4 = num2 >> 3;
+		if (num3 < 0 || num4 < 0 || num3 >= _obj_fcol.map_block_num_x)
+		{
+			// Fuera del mapa: bloque vacio (sin terreno), no el bloque 0.
+			diagOutOfMap++;
+			return default(MP_BLOCK);
+		}
 		int num5 = _obj_fcol.map_block_num_x * num4 + num3;
 		if (num5 < 0)
 		{
