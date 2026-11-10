@@ -80353,7 +80353,8 @@ public class AppMain
 		{
 			if ((int)(lPosX & 0xFFFFFFF8u) > _obj_fcol.right - 1 || lPosX < _obj_fcol.left - 7)
 			{
-				b = 8;
+				// Fuera del mapa en modo limite: sin pared (antes b = 8 era un tope invisible).
+				b = 0;
 			}
 			else if ((int)((lPosX & 0xFFFFFFF8u) + 8) > _obj_fcol.right - 1)
 			{
@@ -80407,7 +80408,8 @@ public class AppMain
 		{
 			if ((int)(lPosY & 0xFFFFFFF8u) > _obj_fcol.bottom - 1 || lPosY < _obj_fcol.top - 7)
 			{
-				return 8;
+				// Fuera del mapa en modo limite: sin pared (antes devolvia 8, un tope invisible).
+				return 0;
 			}
 			if ((int)((lPosY & 0xFFFFFFF8u) + 8) > _obj_fcol.bottom - 1)
 			{
