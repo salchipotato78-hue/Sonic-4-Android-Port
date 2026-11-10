@@ -88815,6 +88815,12 @@ public class AppMain
 
 	private static bool GmObjCheckMapLeftLimit(OBS_OBJECT_WORK obj_work, int ofst)
 	{
+		// Con DISABLE_SCROLL_LIMITS el jugador no se frena en el borde del nivel (480 px): el limite
+		// lateral es el borde visible del celular (lo aplica el clamp de la camara).
+		if (DISABLE_SCROLL_LIMITS)
+		{
+			return false;
+		}
 		if ((obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 <= g_gm_main_system.map_fcol.left + ofst)
 		{
 			return true;
@@ -88824,6 +88830,12 @@ public class AppMain
 
 	private static bool GmObjCheckMapRightLimit(OBS_OBJECT_WORK obj_work, int ofst)
 	{
+		// Con DISABLE_SCROLL_LIMITS el jugador no se frena en el borde del nivel (480 px): el limite
+		// lateral es el borde visible del celular (lo aplica el clamp de la camara).
+		if (DISABLE_SCROLL_LIMITS)
+		{
+			return false;
+		}
 		if ((obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 >= g_gm_main_system.map_fcol.right - ofst)
 		{
 			return true;
