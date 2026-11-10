@@ -141847,11 +141847,13 @@ public class AppMain
 		float num4 = (float)g_gm_main_system.map_fcol.top + (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		float num5 = (float)g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		obj_camera.disp_pos.x = CamArenaFix(obj_camera.disp_pos.x);
-		if (DISABLE_SCROLL_LIMITS && arenaCamSaved && gMS_PLAYER_WORK != null)
+		// Límite = borde visible de la pantalla, en todas las zonas (la cámara sigue igual; en arena queda fija).
+		if (DISABLE_SCROLL_LIMITS && gMS_PLAYER_WORK != null)
 		{
 			int halfW = (int)(GmCamHalfWidth() * obj_camera.scale);
-			int leftPx = (int)arenaCamX - halfW;
-			int rightPx = (int)arenaCamX + halfW;
+			int centerPx = (int)obj_camera.disp_pos.x;
+			int leftPx = centerPx - halfW;
+			int rightPx = centerPx + halfW;
 			int px = gMS_PLAYER_WORK.obj_work.pos.x >> 12;
 			if (px < leftPx)
 			{
