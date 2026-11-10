@@ -80093,6 +80093,8 @@ public class AppMain
 		return _obj_fcol.block_map_datap[suf][num5];
 	}
 
+	public static int diagOutOfMap;
+
 	private static byte[] objGetDiffCharData(int pos_x, int pos_y, ushort suf)
 	{
 		int num = pos_x >> 3;
@@ -80101,6 +80103,14 @@ public class AppMain
 		int num4 = num2 >> 3;
 		int pos_x2 = num - num3 * 8;
 		int pos_y2 = num2 - num4 * 8;
+		if (num3 < 0 || num4 < 0 || num3 >= _obj_fcol.map_block_num_x)
+		{
+			// Fuera del mapa: no hay terreno. Antes se leia el bloque 0 (solido) y eso frenaba al jugador en el borde.
+			diagOutOfMap++;
+			byte[] empty = _objGetDiffCharData.diff_char;
+			Array.Clear(empty, 0, 8);
+			return empty;
+		}
 		int num5 = _obj_fcol.map_block_num_x * num4 + num3;
 		if (num5 < 0)
 		{
@@ -88817,6 +88827,7 @@ public class AppMain
 	public static int diagBlkMapR;
 	public static int diagClampL;
 	public static int diagClampR;
+	public static int diagWallPush;
 	public static float diagLeftPx;
 	public static float diagRightPx;
 
@@ -88833,7 +88844,9 @@ public class AppMain
 			"mapa izq=" + g_gm_main_system.map_fcol.left + " der=" + g_gm_main_system.map_fcol.right + "\n" +
 			"clamp izq=" + diagLeftPx.ToString("0") + " der=" + diagRightPx.ToString("0") + "\n" +
 			"toques mapa izq=" + diagBlkMapL + " der=" + diagBlkMapR + "\n" +
-			"toques clamp izq=" + diagClampL + " der=" + diagClampR;
+			"toques clamp izq=" + diagClampL + " der=" + diagClampR + "\n" +
+			"empuje pared=" + diagWallPush + "  seq=" + ply.seq_state + "\n" +
+			"move_flag=" + ((uint)ply.obj_work.move_flag).ToString("X") + "  fuera mapa=" + diagOutOfMap;
 	}
 
 	private static bool GmObjCheckMapLeftLimit(OBS_OBJECT_WORK obj_work, int ofst)
@@ -141605,7 +141618,7 @@ public class AppMain
 		float num3 = (float)g_gm_main_system.map_fcol.right - GmCamHalfWidth() * obj_camera.scale;
 		float num4 = (float)g_gm_main_system.map_fcol.top + (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		float num5 = (float)g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
-		if (obj_camera.disp_pos.x < num2)
+		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x < num2)
 		{
 			obj_camera.disp_pos.x = num2;
 			if (obj_camera.disp_pos.x > num3)
@@ -141613,7 +141626,7 @@ public class AppMain
 				obj_camera.disp_pos.x = (num3 + num2) / 2f;
 			}
 		}
-		else if (obj_camera.disp_pos.x > num3)
+		else if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x > num3)
 		{
 			obj_camera.disp_pos.x = num3;
 			if (obj_camera.disp_pos.x < num2)
@@ -175748,6 +175761,7 @@ public class AppMain
 	{
 		if ((ply_work.obj_work.move_flag & 4) != 0 && (ply_work.player_flag & 0x8000) == 0 && (((ply_work.obj_work.disp_flag & 1) != 0 && GmPlayerKeyCheckWalkLeft(ply_work)) || ((ply_work.obj_work.disp_flag & 1) == 0 && GmPlayerKeyCheckWalkRight(ply_work))) && ply_work.obj_work.pos.x >> 12 > g_gm_main_system.map_fcol.left + 14 && ply_work.obj_work.pos.x >> 12 < g_gm_main_system.map_fcol.right - 14)
 		{
+			diagWallPush++;
 			return GmPlySeqChangeSequence(ply_work, 18);
 		}
 		return false;
