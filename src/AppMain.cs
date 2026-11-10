@@ -73736,11 +73736,11 @@ public class AppMain
 			num -= OBD_LCD_X << 12;
 			num >>= 13;
 		}
-		if ((float)(obj_camera.limit[0] + num) > pPos.x)
+		if (!DISABLE_SCROLL_LIMITS && (float)(obj_camera.limit[0] + num) > pPos.x)
 		{
 			pPos.x = obj_camera.limit[0] + num;
 		}
-		if ((float)(obj_camera.limit[2] - OBD_LCD_X - num) < pPos.x)
+		if (!DISABLE_SCROLL_LIMITS && (float)(obj_camera.limit[2] - OBD_LCD_X - num) < pPos.x)
 		{
 			pPos.x = obj_camera.limit[2] - OBD_LCD_X - num;
 		}
@@ -141299,7 +141299,7 @@ public class AppMain
 		float num2 = (float)(GSD_DISP_HEIGHT / 2) * oBS_CAMERA.scale;
 		float num3 = (float)g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * oBS_CAMERA.scale;
 		oBS_CAMERA.pos.x = FXM_FX32_TO_FLOAT(pos_x);
-		if (!CamFreeX() && oBS_CAMERA.pos.x < num)
+		if (!DISABLE_SCROLL_LIMITS && oBS_CAMERA.pos.x < num)
 		{
 			oBS_CAMERA.pos.x = num;
 		}
@@ -141846,11 +141846,13 @@ public class AppMain
 		float num3 = (float)g_gm_main_system.map_fcol.right - GmCamHalfWidth() * obj_camera.scale;
 		float num4 = (float)g_gm_main_system.map_fcol.top + (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		float num5 = (float)g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
-		if (!CamFreeX() && obj_camera.disp_pos.x < num2)
+		obj_camera.disp_pos.x = CamArenaFix(obj_camera.disp_pos.x);
+		CamArenaPlayerClamp();
+		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x < num2)
 		{
 			obj_camera.disp_pos.x = num2;
 		}
-		if (!CamFreeX() && obj_camera.disp_pos.x > num3)
+		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x > num3)
 		{
 			obj_camera.disp_pos.x = num3;
 		}
@@ -148308,10 +148310,34 @@ public class AppMain
 	// EXPERIMENTO: true quita los topes horizontales de la cámara (límites de scroll en X).
 	// Si el jugador deja de pararse en los laterales, el origen es la cámara. Poner false para volver al comportamiento original.
 	public const bool DISABLE_SCROLL_LIMITS = true;
-	// Cámara libre en X solo si no hay bloqueo de scroll de jefe (arenas de jefe siguen centradas).
-	private static bool CamFreeX()
+	// En arena de jefe la cámara NO se mueve: guarda su X al entrar y la mantiene. Sin clamps, Sonic no tiene topes.
+	private static bool arenaCamSaved;
+	private static float arenaCamX;
+	private static float CamArenaFix(float x)
 	{
-		return DISABLE_SCROLL_LIMITS && !GmBoss4UtilIsScrollLocking();
+		if (!DISABLE_SCROLL_LIMITS) return x;
+		if (!GmBoss4UtilIsScrollLocking()) { arenaCamSaved = false; return x; }
+		if (!arenaCamSaved) { arenaCamX = x; arenaCamSaved = true; }
+		return arenaCamX;
+	}
+	// Dentro de la arena, Sonic no puede salir del borde visible (ancho real de pantalla, como los ports de 2013).
+	private static void CamArenaPlayerClamp()
+	{
+		if (!DISABLE_SCROLL_LIMITS || !arenaCamSaved || gMS_PLAYER_WORK == null) return;
+		int halfW = (int)(GmCamHalfWidth() * obj_camera.scale);
+		int left = (int)arenaCamX - halfW;
+		int right = (int)arenaCamX + halfW;
+		int px = gMS_PLAYER_WORK.obj_work.pos.x >> 12;
+		if (px < left)
+		{
+			gMS_PLAYER_WORK.obj_work.pos.x = left << 12;
+			gMS_PLAYER_WORK.obj_work.spd.x = 0;
+		}
+		else if (px > right)
+		{
+			gMS_PLAYER_WORK.obj_work.pos.x = right << 12;
+			gMS_PLAYER_WORK.obj_work.spd.x = 0;
+		}
 	}
 	public const float CASINO_FAR_BASE_ASPECT = 1.0333f;
 	public const bool CASINO_FAR_ZOOM_ENABLED = true;
