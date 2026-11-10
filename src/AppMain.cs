@@ -97486,7 +97486,7 @@ public class AppMain
 		OBS_CAMERA oBS_CAMERA = ObjCameraGet(0);
 		int num = FXM_FLOAT_TO_FX32(oBS_CAMERA.pos.x) >> 12;
 		int num2 = -FXM_FLOAT_TO_FX32(oBS_CAMERA.pos.y) >> 12;
-		int num3 = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_WIDTH / 2f * oBS_CAMERA.scale) >> 12;
+		int num3 = FXM_FLOAT_TO_FX32(GmCamHalfWidth() * oBS_CAMERA.scale) >> 12;
 		int num4 = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_HEIGHT / 2f * oBS_CAMERA.scale) >> 12;
 		int user_work = (int)obj_work.user_work;
 		int user_work2 = (int)obj_work.user_work;
@@ -97602,7 +97602,7 @@ public class AppMain
 		int num2 = -FXM_FLOAT_TO_FX32(oBS_CAMERA.pos.y) >> 12;
 		int num3 = 1;
 		int num4 = 1;
-		int num5 = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_WIDTH / 2f * oBS_CAMERA.scale) >> 12;
+		int num5 = FXM_FLOAT_TO_FX32(GmCamHalfWidth() * oBS_CAMERA.scale) >> 12;
 		int num6 = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_HEIGHT / 2f * oBS_CAMERA.scale) >> 12;
 		byte b = 1;
 		if ((Convert.ToInt32(obj_work.user_flag) & 1) != 0 && g_gm_main_system.map_fcol.left != gMS_GMK_CAM_SCR_LIMIT_WORK.limit_setting.limit_rect[0])
