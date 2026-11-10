@@ -141668,6 +141668,31 @@ public class AppMain
 				obj_camera.flag &= 2147483647u;
 			}
 		}
+		// Limite lateral = borde de la pantalla del celular (mitad del ancho de render alrededor de la camara).
+		// Esta es la camara que usan los niveles, asi que aqui se aplica el clamp a ambos lados.
+		if (DISABLE_SCROLL_LIMITS && g_gm_main_system.ply_work[0] != null)
+		{
+			GMS_PLAYER_WORK clampPly = g_gm_main_system.ply_work[0];
+			int halfPxC = (int)(GmCamHalfWidth() * obj_camera.scale);
+			int centerPxC = (int)obj_camera.disp_pos.x;
+			int leftPxC = centerPxC - halfPxC;
+			int rightPxC = centerPxC + halfPxC;
+			int pxC = clampPly.obj_work.pos.x >> 12;
+			diagLeftPx = leftPxC;
+			diagRightPx = rightPxC;
+			if (pxC < leftPxC)
+			{
+				diagClampL++;
+				clampPly.obj_work.pos.x = leftPxC << 12;
+				clampPly.obj_work.spd.x = 0;
+			}
+			else if (pxC > rightPxC)
+			{
+				diagClampR++;
+				clampPly.obj_work.pos.x = rightPxC << 12;
+				clampPly.obj_work.spd.x = 0;
+			}
+		}
 		ObjObjectCameraSet(FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - (float)(OBD_LCD_X / 2)), FXM_FLOAT_TO_FX32(0f - obj_camera.disp_pos.y - (float)(OBD_LCD_Y / 2)), FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - (float)(OBD_LCD_X / 2)), FXM_FLOAT_TO_FX32(0f - obj_camera.disp_pos.y - (float)(OBD_LCD_Y / 2)));
 		GmCameraSetClipCamera(obj_camera);
 	}
