@@ -141847,7 +141847,23 @@ public class AppMain
 		float num4 = (float)g_gm_main_system.map_fcol.top + (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		float num5 = (float)g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		obj_camera.disp_pos.x = CamArenaFix(obj_camera.disp_pos.x);
-		CamArenaPlayerClamp();
+		if (DISABLE_SCROLL_LIMITS && arenaCamSaved && gMS_PLAYER_WORK != null)
+		{
+			int halfW = (int)(GmCamHalfWidth() * obj_camera.scale);
+			int leftPx = (int)arenaCamX - halfW;
+			int rightPx = (int)arenaCamX + halfW;
+			int px = gMS_PLAYER_WORK.obj_work.pos.x >> 12;
+			if (px < leftPx)
+			{
+				gMS_PLAYER_WORK.obj_work.pos.x = leftPx << 12;
+				gMS_PLAYER_WORK.obj_work.spd.x = 0;
+			}
+			else if (px > rightPx)
+			{
+				gMS_PLAYER_WORK.obj_work.pos.x = rightPx << 12;
+				gMS_PLAYER_WORK.obj_work.spd.x = 0;
+			}
+		}
 		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x < num2)
 		{
 			obj_camera.disp_pos.x = num2;
@@ -148319,25 +148335,6 @@ public class AppMain
 		if (!GmBoss4UtilIsScrollLocking()) { arenaCamSaved = false; return x; }
 		if (!arenaCamSaved) { arenaCamX = x; arenaCamSaved = true; }
 		return arenaCamX;
-	}
-	// Dentro de la arena, Sonic no puede salir del borde visible (ancho real de pantalla, como los ports de 2013).
-	private static void CamArenaPlayerClamp()
-	{
-		if (!DISABLE_SCROLL_LIMITS || !arenaCamSaved || gMS_PLAYER_WORK == null) return;
-		int halfW = (int)(GmCamHalfWidth() * obj_camera.scale);
-		int left = (int)arenaCamX - halfW;
-		int right = (int)arenaCamX + halfW;
-		int px = gMS_PLAYER_WORK.obj_work.pos.x >> 12;
-		if (px < left)
-		{
-			gMS_PLAYER_WORK.obj_work.pos.x = left << 12;
-			gMS_PLAYER_WORK.obj_work.spd.x = 0;
-		}
-		else if (px > right)
-		{
-			gMS_PLAYER_WORK.obj_work.pos.x = right << 12;
-			gMS_PLAYER_WORK.obj_work.spd.x = 0;
-		}
 	}
 	public const float CASINO_FAR_BASE_ASPECT = 1.0333f;
 	public const bool CASINO_FAR_ZOOM_ENABLED = true;
