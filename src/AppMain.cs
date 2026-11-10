@@ -141668,29 +141668,29 @@ public class AppMain
 				obj_camera.flag &= 2147483647u;
 			}
 		}
-		// Limite lateral = borde de la pantalla del celular (mitad del ancho de render alrededor de la camara).
-		// Esta es la camara que usan los niveles, asi que aqui se aplica el clamp a ambos lados.
-		if (DISABLE_SCROLL_LIMITS && g_gm_main_system.ply_work[0] != null)
+		// Paredes invisibles en los bordes de la pantalla del celular (calculadas con el ancho de render).
+		// Se desactivan durante la meta (GOAL_IN) para que la animacion de fin de nivel no se bloquee.
+		if (DISABLE_SCROLL_LIMITS && (g_gm_main_system.game_flag & 1048576u) == 0u && g_gm_main_system.ply_work[0] != null)
 		{
-			GMS_PLAYER_WORK clampPly = g_gm_main_system.ply_work[0];
-			int halfPxC = (int)(GmCamHalfWidth() * obj_camera.scale);
-			int centerPxC = (int)obj_camera.disp_pos.x;
-			int leftPxC = centerPxC - halfPxC;
-			int rightPxC = centerPxC + halfPxC;
-			int pxC = clampPly.obj_work.pos.x >> 12;
-			diagLeftPx = leftPxC;
-			diagRightPx = rightPxC;
-			if (pxC < leftPxC)
+			GMS_PLAYER_WORK wallPly = g_gm_main_system.ply_work[0];
+			int halfPxW = (int)(GmCamHalfWidth() * obj_camera.scale);
+			int centerPxW = (int)obj_camera.disp_pos.x;
+			int leftPxW = centerPxW - halfPxW;
+			int rightPxW = centerPxW + halfPxW;
+			int pxW = wallPly.obj_work.pos.x >> 12;
+			diagLeftPx = leftPxW;
+			diagRightPx = rightPxW;
+			if (pxW < leftPxW)
 			{
 				diagClampL++;
-				clampPly.obj_work.pos.x = leftPxC << 12;
-				clampPly.obj_work.spd.x = 0;
+				wallPly.obj_work.pos.x = leftPxW << 12;
+				wallPly.obj_work.spd.x = 0;
 			}
-			else if (pxC > rightPxC)
+			else if (pxW > rightPxW)
 			{
 				diagClampR++;
-				clampPly.obj_work.pos.x = rightPxC << 12;
-				clampPly.obj_work.spd.x = 0;
+				wallPly.obj_work.pos.x = rightPxW << 12;
+				wallPly.obj_work.spd.x = 0;
 			}
 		}
 		ObjObjectCameraSet(FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - (float)(OBD_LCD_X / 2)), FXM_FLOAT_TO_FX32(0f - obj_camera.disp_pos.y - (float)(OBD_LCD_Y / 2)), FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - (float)(OBD_LCD_X / 2)), FXM_FLOAT_TO_FX32(0f - obj_camera.disp_pos.y - (float)(OBD_LCD_Y / 2)));
