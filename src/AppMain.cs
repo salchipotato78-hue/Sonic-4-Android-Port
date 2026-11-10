@@ -141618,7 +141618,7 @@ public class AppMain
 		float num3 = (float)g_gm_main_system.map_fcol.right - GmCamHalfWidth() * obj_camera.scale;
 		float num4 = (float)g_gm_main_system.map_fcol.top + (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		float num5 = (float)g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
-		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x < num2)
+		if (obj_camera.disp_pos.x < num2)
 		{
 			obj_camera.disp_pos.x = num2;
 			if (obj_camera.disp_pos.x > num3)
@@ -141626,7 +141626,7 @@ public class AppMain
 				obj_camera.disp_pos.x = (num3 + num2) / 2f;
 			}
 		}
-		else if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x > num3)
+		else if (obj_camera.disp_pos.x > num3)
 		{
 			obj_camera.disp_pos.x = num3;
 			if (obj_camera.disp_pos.x < num2)
