@@ -88813,34 +88813,55 @@ public class AppMain
 	{
 	}
 
+	public static int diagBlkMapL;
+	public static int diagBlkMapR;
+	public static int diagClampL;
+	public static int diagClampR;
+	public static float diagLeftPx;
+	public static float diagRightPx;
+
+	public static string DiagLimitsText()
+	{
+		GMS_PLAYER_WORK ply = g_gm_main_system.ply_work[0];
+		if (ply == null)
+		{
+			return "sin jugador";
+		}
+		int px = ply.obj_work.pos.x >> 12;
+		return "DIAG bordes\n" +
+			"jugador x=" + px + "  spd.x=" + ply.obj_work.spd.x + "\n" +
+			"mapa izq=" + g_gm_main_system.map_fcol.left + " der=" + g_gm_main_system.map_fcol.right + "\n" +
+			"clamp izq=" + diagLeftPx.ToString("0") + " der=" + diagRightPx.ToString("0") + "\n" +
+			"toques mapa izq=" + diagBlkMapL + " der=" + diagBlkMapR + "\n" +
+			"toques clamp izq=" + diagClampL + " der=" + diagClampR;
+	}
+
 	private static bool GmObjCheckMapLeftLimit(OBS_OBJECT_WORK obj_work, int ofst)
 	{
-		// Con DISABLE_SCROLL_LIMITS el jugador no se frena en el borde del nivel (480 px): el limite
-		// lateral es el borde visible del celular (lo aplica el clamp de la camara).
+		bool raw = (obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 <= g_gm_main_system.map_fcol.left + ofst;
+		if (raw)
+		{
+			diagBlkMapL++;
+		}
 		if (DISABLE_SCROLL_LIMITS)
 		{
 			return false;
 		}
-		if ((obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 <= g_gm_main_system.map_fcol.left + ofst)
-		{
-			return true;
-		}
-		return false;
+		return raw;
 	}
 
 	private static bool GmObjCheckMapRightLimit(OBS_OBJECT_WORK obj_work, int ofst)
 	{
-		// Con DISABLE_SCROLL_LIMITS el jugador no se frena en el borde del nivel (480 px): el limite
-		// lateral es el borde visible del celular (lo aplica el clamp de la camara).
+		bool raw = (obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 >= g_gm_main_system.map_fcol.right - ofst;
+		if (raw)
+		{
+			diagBlkMapR++;
+		}
 		if (DISABLE_SCROLL_LIMITS)
 		{
 			return false;
 		}
-		if ((obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 >= g_gm_main_system.map_fcol.right - ofst)
-		{
-			return true;
-		}
-		return false;
+		return raw;
 	}
 
 	private static void GmObjSetClip(OBS_OBJECT_WORK obj_work, short out_ofst, short plus_left, short plus_top, short plus_right, short plus_bottom)
@@ -141867,13 +141888,17 @@ public class AppMain
 			int leftPx = centerPx - halfW;
 			int rightPx = centerPx + halfW;
 			int px = gMS_PLAYER_WORK.obj_work.pos.x >> 12;
+			diagLeftPx = leftPx;
+			diagRightPx = rightPx;
 			if (px < leftPx)
 			{
+				diagClampL++;
 				gMS_PLAYER_WORK.obj_work.pos.x = leftPx << 12;
 				gMS_PLAYER_WORK.obj_work.spd.x = 0;
 			}
 			else if (px > rightPx)
 			{
+				diagClampR++;
 				gMS_PLAYER_WORK.obj_work.pos.x = rightPx << 12;
 				gMS_PLAYER_WORK.obj_work.spd.x = 0;
 			}

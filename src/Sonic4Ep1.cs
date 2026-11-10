@@ -815,9 +815,26 @@ public class Sonic4Ep1 : Game
         spriteBatch.End();
     }
 
+    // Diagnóstico de topes laterales: muestra los límites activos y cuántas veces chocó el jugador con cada uno.
+    private const bool DIAG_LIMITS = true;
+
+    private void DrawLimitDiag()
+    {
+        if (!DIAG_LIMITS || fntKootenay == null)
+        {
+            return;
+        }
+        Viewport vp = GraphicsDevice.Viewport;
+        string info = AppMain.DiagLimitsText();
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
+        spriteBatch.DrawString(fntKootenay, info, new Vector2(8, 8), Color.Lime, 0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0f);
+        spriteBatch.End();
+    }
+
     private void DrawDebug(Rectangle r)
     {
         DrawLayoutDebug(r);
+        DrawLimitDiag();
         if (!DEBUG_TOUCH || fntKootenay == null || pixelTex == null)
         {
             return;
