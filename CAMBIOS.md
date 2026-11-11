@@ -106,3 +106,14 @@
   así que en pantallas más estrechas que 15:9 el juego se cortaba a los lados.
 - Pantalla de 1280 x 2772 (landscape 2772 x 1280): RENDER_W = 693, escala 4 exacta, sin cortes ni barras.
 - Pantallas más estrechas o más anchas que el rango soportado (480 a 864 px de ancho de render) muestran el fondo borroso en la zona sobrante, sin cortes.
+
+## Topes laterales = borde de la pantalla
+- Problema: las paredes de Sonic usaban el rectángulo del mapa del nivel (pensado para 480 px). En pantallas
+  más anchas quedaban paredes invisibles dentro de la pantalla, y al otro lado Sonic podía salirse.
+- `AppMain.SCREEN_EDGE_LIMITS = true`: los topes del jugador (`GmObjCheckMapLeftLimit/RightLimit`) usan los
+  bordes visibles de la cámara (`GmScreenEdgeX`: `disp_pos.x ± GmCamHalfWidth() * scale`).
+- El clamp contra la pantalla ahora corre DESPUÉS de los límites de cámara del nivel, para leer la posición
+  final de la cámara (antes leía la posición sin corregir).
+- La cámara conserva sus límites del nivel (no se muestra vacío fuera del mapa).
+- Para volver al comportamiento anterior: `SCREEN_EDGE_LIMITS = false`.
+- Diagnóstico: el overlay DIAG (DIAG_LIMITS) muestra mapa, clamp y toques contra cada borde.

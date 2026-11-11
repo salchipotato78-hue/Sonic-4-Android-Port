@@ -88857,8 +88857,29 @@ public class AppMain
 			"move_flag=" + ((uint)ply.obj_work.move_flag).ToString("X") + "  fuera mapa=" + diagOutOfMap;
 	}
 
+	// Bordes visibles de la camara en X, en las mismas unidades que pos.x >> 12 y map_fcol.
+	private static void GmScreenEdgeX(out float left, out float right)
+	{
+		OBS_CAMERA cam = ObjCameraGet(g_obj.glb_camera_id);
+		float half = GmCamHalfWidth() * cam.scale;
+		left = cam.disp_pos.x - half;
+		right = cam.disp_pos.x + half;
+	}
+
 	private static bool GmObjCheckMapLeftLimit(OBS_OBJECT_WORK obj_work, int ofst)
 	{
+		if (SCREEN_EDGE_LIMITS)
+		{
+			float sl;
+			float sr;
+			GmScreenEdgeX(out sl, out sr);
+			bool hitS = (obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 <= sl + ofst;
+			if (hitS)
+			{
+				diagBlkMapL++;
+			}
+			return hitS;
+		}
 		bool raw = (obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 <= g_gm_main_system.map_fcol.left + ofst;
 		if (raw)
 		{
@@ -88873,6 +88894,18 @@ public class AppMain
 
 	private static bool GmObjCheckMapRightLimit(OBS_OBJECT_WORK obj_work, int ofst)
 	{
+		if (SCREEN_EDGE_LIMITS)
+		{
+			float sl;
+			float sr;
+			GmScreenEdgeX(out sl, out sr);
+			bool hitS = (obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 >= sr - ofst;
+			if (hitS)
+			{
+				diagBlkMapR++;
+			}
+			return hitS;
+		}
 		bool raw = (obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 >= g_gm_main_system.map_fcol.right - ofst;
 		if (raw)
 		{
@@ -141908,8 +141941,16 @@ public class AppMain
 		float num4 = (float)g_gm_main_system.map_fcol.top + (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		float num5 = (float)g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		obj_camera.disp_pos.x = CamArenaFix(obj_camera.disp_pos.x);
+		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x < num2)
+		{
+			obj_camera.disp_pos.x = num2;
+		}
+		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x > num3)
+		{
+			obj_camera.disp_pos.x = num3;
+		}
 		// Límite = borde visible de la pantalla, en todas las zonas (la cámara sigue igual; en arena queda fija).
-		if (DISABLE_SCROLL_LIMITS && gMS_PLAYER_WORK != null)
+		if ((DISABLE_SCROLL_LIMITS || SCREEN_EDGE_LIMITS) && gMS_PLAYER_WORK != null)
 		{
 			int halfW = (int)(GmCamHalfWidth() * obj_camera.scale);
 			int centerPx = (int)obj_camera.disp_pos.x;
@@ -141930,14 +141971,6 @@ public class AppMain
 				gMS_PLAYER_WORK.obj_work.pos.x = rightPx << 12;
 				gMS_PLAYER_WORK.obj_work.spd.x = 0;
 			}
-		}
-		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x < num2)
-		{
-			obj_camera.disp_pos.x = num2;
-		}
-		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x > num3)
-		{
-			obj_camera.disp_pos.x = num3;
 		}
 		if (obj_camera.disp_pos.y > 0f - num4)
 		{
@@ -148399,6 +148432,9 @@ public class AppMain
 	// EXPERIMENTO: true quita los topes horizontales de la cámara (límites de scroll en X).
 	// Si el jugador deja de pararse en los laterales, el origen es la cámara. Poner false para volver al comportamiento original.
 	public const bool DISABLE_SCROLL_LIMITS = false;
+	// true: los topes laterales de Sonic son los bordes visibles de la pantalla (no el rectangulo del mapa de 480 px).
+	// Sin paredes invisibles dentro de la pantalla y Sonic no sale por ningun lado. La camara conserva sus limites del nivel.
+	public const bool SCREEN_EDGE_LIMITS = true;
 	// En arena de jefe la cámara NO se mueve: guarda su X al entrar y la mantiene. Sin clamps, Sonic no tiene topes.
 	private static bool arenaCamSaved;
 	private static float arenaCamX;
