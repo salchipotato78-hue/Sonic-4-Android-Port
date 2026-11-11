@@ -148390,13 +148390,13 @@ public class AppMain
 	// deja los laterales vacios. Se acerca solo ese fondo (fovy mas cerrado, zoom uniforme), sin cambiar la camara
 	// del nivel. Con pantalla estrecha (aspecto <= CASINO_FAR_BASE_ASPECT) no cambia nada.
 	public const bool CAM_LIMIT_WIDE_EXPAND = false;
-	public const bool CAM_SCRLMT_OFF = true;
+	public const bool CAM_SCRLMT_OFF = false;
 	private static void gmCamScrLimitNop(OBS_OBJECT_WORK obj_work)
 	{
 	}
 	// EXPERIMENTO: true quita los topes horizontales de la cámara (límites de scroll en X).
 	// Si el jugador deja de pararse en los laterales, el origen es la cámara. Poner false para volver al comportamiento original.
-	public const bool DISABLE_SCROLL_LIMITS = true;
+	public const bool DISABLE_SCROLL_LIMITS = false;
 	// En arena de jefe la cámara NO se mueve: guarda su X al entrar y la mantiene. Sin clamps, Sonic no tiene topes.
 	private static bool arenaCamSaved;
 	private static float arenaCamX;
