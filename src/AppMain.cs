@@ -80353,8 +80353,8 @@ public class AppMain
 		{
 			if ((int)(lPosX & 0xFFFFFFF8u) > _obj_fcol.right - 1 || lPosX < _obj_fcol.left - 7)
 			{
-				// Fuera del mapa en modo limite: sin pared (antes b = 8 era un tope invisible).
-				b = 0;
+				// Fuera del mapa en modo limite: con WALL_OUT_OF_MAP la pared se conserva (evita que Sonic salga de la pantalla).
+				b = WALL_OUT_OF_MAP ? (sbyte)8 : (sbyte)0;
 			}
 			else if ((int)((lPosX & 0xFFFFFFF8u) + 8) > _obj_fcol.right - 1)
 			{
@@ -80408,8 +80408,8 @@ public class AppMain
 		{
 			if ((int)(lPosY & 0xFFFFFFF8u) > _obj_fcol.bottom - 1 || lPosY < _obj_fcol.top - 7)
 			{
-				// Fuera del mapa en modo limite: sin pared (antes devolvia 8, un tope invisible).
-				return 0;
+				// Fuera del mapa en modo limite: con WALL_OUT_OF_MAP la pared se conserva.
+				return WALL_OUT_OF_MAP ? 8 : 0;
 			}
 			if ((int)((lPosY & 0xFFFFFFF8u) + 8) > _obj_fcol.bottom - 1)
 			{
@@ -148390,6 +148390,8 @@ public class AppMain
 	// deja los laterales vacios. Se acerca solo ese fondo (fovy mas cerrado, zoom uniforme), sin cambiar la camara
 	// del nivel. Con pantalla estrecha (aspecto <= CASINO_FAR_BASE_ASPECT) no cambia nada.
 	public const bool CAM_LIMIT_WIDE_EXPAND = false;
+	// true: la pared del limite del mapa tambien se aplica fuera del mapa (Sonic no sale de la pantalla por la derecha).
+	public const bool WALL_OUT_OF_MAP = true;
 	public const bool CAM_SCRLMT_OFF = false;
 	private static void gmCamScrLimitNop(OBS_OBJECT_WORK obj_work)
 	{
