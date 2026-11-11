@@ -66901,7 +66901,9 @@ public class AppMain
 	// así la cámara puede llegar a los bordes del mapa y mostrar el escenario a los lados.
 	public static float GmCamHalfWidth()
 	{
-		return Sonic4Ep1.RENDER_W * 0.5f;
+		// La proyeccion mapea GSD_DISP_HEIGHT unidades de mundo a GAME_H pixeles de alto; el ancho visible
+		// sigue esa misma escala. Con GAME_H = 288 y GSD_DISP_HEIGHT = 320 el ancho es RENDER_W/2 * 320/288.
+		return Sonic4Ep1.RENDER_W * 0.5f * (GSD_DISP_HEIGHT / (float)Sonic4Ep1.GAME_H);
 	}
 
 	public static int GSD_DISP_WIDTH
