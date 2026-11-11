@@ -97420,6 +97420,13 @@ public class AppMain
 		GMS_ENEMY_COM_WORK gMS_ENEMY_COM_WORK = (GMS_ENEMY_COM_WORK)oBS_OBJECT_WORK;
 		gMS_ENEMY_COM_WORK.enemy_flag |= 65536u;
 		oBS_OBJECT_WORK.user_flag = eve_rec.flag;
+		// Interruptor: los rectangulos de limite de camara (GMK_CAM_SCRLMT) son los bordes del nivel.
+		// Con CAM_SCRLMT_OFF no se aplican: el mapa usa todo su tamano y no hay topes de camara.
+		if (CAM_SCRLMT_OFF)
+		{
+			oBS_OBJECT_WORK.ppFunc = gmCamScrLimitNop;
+			return oBS_OBJECT_WORK;
+		}
 		oBS_OBJECT_WORK.move_flag |= 8480u;
 		oBS_OBJECT_WORK.flag |= 16u;
 		GMS_GMK_CAM_SCR_LIMIT_SETTING limit_setting = gMS_GMK_CAM_SCR_LIMIT_WORK.limit_setting;
@@ -141668,31 +141675,6 @@ public class AppMain
 				obj_camera.flag &= 2147483647u;
 			}
 		}
-		// Paredes invisibles en los bordes de la pantalla del celular (calculadas con el ancho de render).
-		// Se desactivan durante la meta (GOAL_IN) para que la animacion de fin de nivel no se bloquee.
-		if (DISABLE_SCROLL_LIMITS && (g_gm_main_system.game_flag & 1048576u) == 0u && g_gm_main_system.ply_work[0] != null)
-		{
-			GMS_PLAYER_WORK wallPly = g_gm_main_system.ply_work[0];
-			int halfPxW = (int)(GmCamHalfWidth() * obj_camera.scale);
-			int centerPxW = (int)obj_camera.disp_pos.x;
-			int leftPxW = centerPxW - halfPxW;
-			int rightPxW = centerPxW + halfPxW;
-			int pxW = wallPly.obj_work.pos.x >> 12;
-			diagLeftPx = leftPxW;
-			diagRightPx = rightPxW;
-			if (pxW < leftPxW)
-			{
-				diagClampL++;
-				wallPly.obj_work.pos.x = leftPxW << 12;
-				wallPly.obj_work.spd.x = 0;
-			}
-			else if (pxW > rightPxW)
-			{
-				diagClampR++;
-				wallPly.obj_work.pos.x = rightPxW << 12;
-				wallPly.obj_work.spd.x = 0;
-			}
-		}
 		ObjObjectCameraSet(FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - (float)(OBD_LCD_X / 2)), FXM_FLOAT_TO_FX32(0f - obj_camera.disp_pos.y - (float)(OBD_LCD_Y / 2)), FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - (float)(OBD_LCD_X / 2)), FXM_FLOAT_TO_FX32(0f - obj_camera.disp_pos.y - (float)(OBD_LCD_Y / 2)));
 		GmCameraSetClipCamera(obj_camera);
 	}
@@ -148408,6 +148390,10 @@ public class AppMain
 	// deja los laterales vacios. Se acerca solo ese fondo (fovy mas cerrado, zoom uniforme), sin cambiar la camara
 	// del nivel. Con pantalla estrecha (aspecto <= CASINO_FAR_BASE_ASPECT) no cambia nada.
 	public const bool CAM_LIMIT_WIDE_EXPAND = false;
+	public const bool CAM_SCRLMT_OFF = true;
+	private static void gmCamScrLimitNop(OBS_OBJECT_WORK obj_work)
+	{
+	}
 	// EXPERIMENTO: true quita los topes horizontales de la cámara (límites de scroll en X).
 	// Si el jugador deja de pararse en los laterales, el origen es la cámara. Poner false para volver al comportamiento original.
 	public const bool DISABLE_SCROLL_LIMITS = true;
