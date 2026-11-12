@@ -117,3 +117,22 @@
 - La cámara conserva sus límites del nivel (no se muestra vacío fuera del mapa).
 - Para volver al comportamiento anterior: `SCREEN_EDGE_LIMITS = false`.
 - Diagnóstico: el overlay DIAG (DIAG_LIMITS) muestra mapa, clamp y toques contra cada borde.
+
+## Topes de pantalla en todos los niveles (no en fases especiales)
+- `AppMain.ScreenLimitActive()` = `SCREEN_EDGE_LIMITS` y no fase especial (`GSM_MAIN_STAGE_IS_SPSTAGE_NOT_RETRY`).
+- Las paredes que bloqueaban a Sonic estaban en el terreno del modo límite (`objGetColDataX` con `0x40`) y en
+  `objBlockColLimit`, que usaban `_obj_fcol` / `_obj_bcol` (límites del nivel). Ahora usan los bordes de la pantalla
+  (`ColLimitX` / `ColBlkX`). Fuera de la condición, el comportamiento es el original.
+- Topes del jugador (`GmObjCheckMapLeft/RightLimit`) y clamp de cámara usan la misma condición.
+- Pendiente de verificar en el teléfono: que el borde calculado (`GmCamHalfWidth`) coincida con el borde visible.
+
+## Topes = bordes de la pantalla del celular (todos los niveles menos especiales)
+- Con `ScreenLimitActive()` la cámara ya no se clampea contra el rectángulo del nivel (`map_fcol`, `obj_camera.limit`).
+- El tope de Sonic son los bordes de la pantalla, calculados con el tamaño real del render (`RENDER_W`, vía `GmCamHalfWidth` y `GmScreenEdgeX`).
+- Se desactiva el empuje de pared basado en `map_fcol` cuando el tope es la pantalla.
+- La colisión de terreno del nivel no se modificó.
+
+## Cámara fija en los bordes
+- La cámara conserva sus límites del nivel: cuando llega a un borde se queda fija y no sigue a Sonic.
+- El tope del jugador (paredes de pantalla) se calcula con el ancho real de la pantalla del celular.
+- `gmPlySeqCheckWallPush` no aplica con topes de pantalla (usaba los límites del mapa).

@@ -827,7 +827,10 @@ public class Sonic4Ep1 : Game
         Viewport vp = GraphicsDevice.Viewport;
         string info = AppMain.DiagLimitsText();
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
-        spriteBatch.DrawString(fntKootenay, info, new Vector2(8, 8), Color.Lime, 0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0f);
+        // Texto grande sobre fondo oscuro para leerlo de una captura.
+        Vector2 size = fntKootenay.MeasureString(info) * 1.6f;
+        spriteBatch.Draw(pixelTex, new Rectangle(4, 4, (int)size.X + 16, (int)size.Y + 16), new Color(0, 0, 0, 200));
+        spriteBatch.DrawString(fntKootenay, info, new Vector2(12, 12), Color.Yellow, 0f, Vector2.Zero, 1.6f, SpriteEffects.None, 0f);
         spriteBatch.End();
     }
 
