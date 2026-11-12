@@ -88851,8 +88851,24 @@ public class AppMain
 		return sl.ToString("0") + "/" + sr.ToString("0");
 	}
 
+	private static string DiagCamText()
+	{
+		OBS_CAMERA c = ObjCameraGet(g_obj.glb_camera_id);
+		if (c == null)
+		{
+			return "null";
+		}
+		return "pos.z=" + c.pos.z.ToString("0.0") + " disp.z=" + c.disp_pos.z.ToString("0.0") +
+			" scale=" + c.scale.ToString("0.000") + " M11=" + c.prj_pers_mtx.M11.ToString("0.000") +
+			" fovy=" + c.fovy;
+	}
+
 	public static string DiagLimitsText()
 	{
+		if (g_gm_main_system == null)
+		{
+			return "sin nivel";
+		}
 		GMS_PLAYER_WORK ply = g_gm_main_system.ply_work[0];
 		if (ply == null)
 		{
@@ -88870,12 +88886,23 @@ public class AppMain
 			"PANTALLA izq/der=" + DiagScreenEdges() + "\n" +
 			"TERRENO fcol izq/der=" + (_obj_fcol == null ? "null" : _obj_fcol.left + "/" + _obj_fcol.right) + "\n" +
 			"BLOQUES bcol izq/der=" + (_obj_bcol == null ? "null" : _obj_bcol.left + "/" + _obj_bcol.right) + "\n" +
-			"modo limite 0x80000=" + ((ply.obj_work.move_flag & 0x80000) != 0 ? "SI" : "no");
+			"modo limite 0x80000=" + ((ply.obj_work.move_flag & 0x80000) != 0 ? "SI" : "no") + "\nCAM " + DiagCamText();
 	}
 
 	// Bordes visibles de la camara en X, en las mismas unidades que pos.x >> 12 y map_fcol.
+	private static bool ScreenCamReady()
+	{
+		return g_gm_main_system != null && ObjCameraGet(g_obj.glb_camera_id) != null;
+	}
+
 	private static void GmScreenEdgeX(out float left, out float right)
 	{
+		if (!ScreenCamReady())
+		{
+			left = g_gm_main_system != null ? g_gm_main_system.map_fcol.left : 0f;
+			right = g_gm_main_system != null ? g_gm_main_system.map_fcol.right : 0f;
+			return;
+		}
 		OBS_CAMERA cam = ObjCameraGet(g_obj.glb_camera_id);
 		float half = GmCamHalfWidth() * cam.scale;
 		left = cam.disp_pos.x - half;
@@ -88885,7 +88912,7 @@ public class AppMain
 	// Topes de pantalla activos en todo el juego excepto fases especiales.
 	private static bool ScreenLimitActive()
 	{
-		return SCREEN_EDGE_LIMITS && !GSM_MAIN_STAGE_IS_SPSTAGE_NOT_RETRY();
+		return SCREEN_EDGE_LIMITS && ScreenCamReady() && !GSM_MAIN_STAGE_IS_SPSTAGE_NOT_RETRY();
 	}
 
 	// Bordes de pantalla como enteros para la colision de terreno en modo limite.

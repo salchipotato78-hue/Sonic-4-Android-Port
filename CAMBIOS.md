@@ -136,3 +136,10 @@
 - La cámara conserva sus límites del nivel: cuando llega a un borde se queda fija y no sigue a Sonic.
 - El tope del jugador (paredes de pantalla) se calcula con el ancho real de la pantalla del celular.
 - `gmPlySeqCheckWallPush` no aplica con topes de pantalla (usaba los límites del mapa).
+
+## Corrección de cierre (NullReferenceException)
+- `GmScreenEdgeX`, `ScreenLimitActive` y `DiagLimitsText` comprueban que exista la cámara y el estado del juego.
+  El overlay se dibuja en cada frame y la cámara es nula al salir de un nivel, lo que cerraba la app.
+
+## Diagnóstico de cámara (para calcular el borde real)
+- El overlay muestra `pos.z`, `disp.z`, `scale`, `M11` (proyección) y `fovy` de la cámara que se dibuja.
