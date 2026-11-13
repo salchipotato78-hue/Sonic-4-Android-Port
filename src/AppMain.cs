@@ -148426,7 +148426,7 @@ public class AppMain
 	// Zoom del fondo lejano de Casino Street (zona 2): el skyline es un modelo de ancho fijo y en ultrawide
 	// deja los laterales vacios. Se acerca solo ese fondo (fovy mas cerrado, zoom uniforme), sin cambiar la camara
 	// del nivel. Con pantalla estrecha (aspecto <= CASINO_FAR_BASE_ASPECT) no cambia nada.
-	public const bool CAM_LIMIT_WIDE_EXPAND = false;
+	public const bool CAM_LIMIT_WIDE_EXPAND = true;
 	// true: la pared del limite del mapa tambien se aplica fuera del mapa (Sonic no sale de la pantalla por la derecha).
 	public const bool WALL_OUT_OF_MAP = true;
 	public const bool CAM_SCRLMT_OFF = false;
@@ -148461,7 +148461,7 @@ public class AppMain
 	{
 		GMS_MAP_FAR_CAMERA gMS_MAP_FAR_CAMERA = gmMapFarCameraGetInfo();
 		float farZoom = 1f;
-		if (CASINO_FAR_ZOOM_ENABLED && gmMapFarGetZoneType(gmMapFarGetStageId()) == 1)
+		if (CASINO_FAR_ZOOM_ENABLED && (gmMapFarGetZoneType(gmMapFarGetStageId()) == 1 || gmMapFarGetStageId() == GSD_MAIN_STAGE_ID_1_BOSS))
 		{
 			farZoom = Math.Max(1f, AMD_SCREEN_ASPECT / CASINO_FAR_BASE_ASPECT);
 		}
