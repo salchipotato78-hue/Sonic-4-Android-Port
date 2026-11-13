@@ -148440,8 +148440,8 @@ public class AppMain
 	public const bool SCREEN_EDGE_LIMITS = true;
 	// Margen desde el borde visible: mitad del ancho de Sonic + animacion, para que se vea completo.
 	public const int SCREEN_EDGE_MARGIN = 3;
-	// Mitad del ancho de Sonic (~340 px de 2576 px, en unidades del nivel). El tope usa el costado, no el centro.
-	public const int SONIC_HALF_WIDTH = 46;
+	// Mitad del ancho del sprite de Sonic (~125 px de 2576 px ≈ 34 unidades). El tope usa el costado, no el centro.
+	public const int SONIC_HALF_WIDTH = 17;
 	// En arena de jefe la cámara NO se mueve: guarda su X al entrar y la mantiene. Sin clamps, Sonic no tiene topes.
 	private static bool arenaCamSaved;
 	private static float arenaCamX;
