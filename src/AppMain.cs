@@ -88867,6 +88867,8 @@ public class AppMain
 
 	// true: sin pared lateral al final del mapa; el suelo del borde se prolonga para que Sonic no caiga.
 	public const bool REMOVE_PLAYER_WALLS = true;
+	// true: el escenario se extiende hacia abajo repitiendo su última fila (plano, sin cortes).
+	public const bool MAP_EXTEND_BOTTOM = true;
 
 	private static bool GmObjCheckMapLeftLimit(OBS_OBJECT_WORK obj_work, int ofst)
 	{
@@ -182507,7 +182509,7 @@ public class AppMain
 				num2 = -(mp_header.map_w << 6);
 			}
 		}
-		if (num10 >= mp_header.map_h)
+		if (!MAP_EXTEND_BOTTOM && num10 >= mp_header.map_h)
 		{
 			num10 = mp_header.map_h - 1;
 		}
@@ -182944,11 +182946,11 @@ public class AppMain
 		{
 			mP_HEADER = (MP_HEADER)g_gm_gamedat_map_set[1];
 			mD_HEADER = (MD_HEADER)g_gm_gamedat_map_set[3];
-			gmMapSetDrawMapTvx(tvxamb, mP_HEADER, mD_HEADER, x, pos_y, gmMapTransX, 0f, -128f, true, mP_HEADER.blocks[0], mD_HEADER.blocks[0]);
+			gmMapSetDrawMapTvx(tvxamb, mP_HEADER, mD_HEADER, x, pos_y, gmMapTransX, 0f, -128f, false, mP_HEADER.blocks[0], mD_HEADER.blocks[0]);
 		}
 		mP_HEADER = (MP_HEADER)g_gm_gamedat_map_set[0];
 		mD_HEADER = (MD_HEADER)g_gm_gamedat_map_set[2];
-		gmMapSetDrawMapTvx(tvxamb, mP_HEADER, mD_HEADER, x, pos_y, gmMapTransX, 0f, 128f, true, mP_HEADER.blocks[0], mD_HEADER.blocks[0]);
+		gmMapSetDrawMapTvx(tvxamb, mP_HEADER, mD_HEADER, x, pos_y, gmMapTransX, 0f, 128f, false, mP_HEADER.blocks[0], mD_HEADER.blocks[0]);
 		gmMapExecuteDrawMapTvx(nNS_MATRIX, texlist);
 		if (gm_map_tex_draw_count > 0)
 		{
@@ -183071,7 +183073,7 @@ public class AppMain
 				num2 = -(mp_header.map_w << 6);
 			}
 		}
-		if (num10 >= mp_header.map_h)
+		if (!MAP_EXTEND_BOTTOM && num10 >= mp_header.map_h)
 		{
 			num10 = mp_header.map_h - 1;
 		}
@@ -183110,7 +183112,7 @@ public class AppMain
 		{
 			for (int l = block_top; l <= block_bottom; l++)
 			{
-				int num2 = l * mp_header.map_w + k;
+				int num2 = (l >= mp_header.map_h ? mp_header.map_h - 1 : l) * mp_header.map_w + k;
 				MP_BLOCK mp = mp_header.blocks[num2];
 				float num3 = k;
 				float num4 = l;
