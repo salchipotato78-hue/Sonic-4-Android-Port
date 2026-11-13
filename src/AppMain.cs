@@ -182944,11 +182944,11 @@ public class AppMain
 		{
 			mP_HEADER = (MP_HEADER)g_gm_gamedat_map_set[1];
 			mD_HEADER = (MD_HEADER)g_gm_gamedat_map_set[3];
-			gmMapSetDrawMapTvx(tvxamb, mP_HEADER, mD_HEADER, x, pos_y, gmMapTransX, 0f, -128f, false, mP_HEADER.blocks[0], mD_HEADER.blocks[0]);
+			gmMapSetDrawMapTvx(tvxamb, mP_HEADER, mD_HEADER, x, pos_y, gmMapTransX, 0f, -128f, true, mP_HEADER.blocks[0], mD_HEADER.blocks[0]);
 		}
 		mP_HEADER = (MP_HEADER)g_gm_gamedat_map_set[0];
 		mD_HEADER = (MD_HEADER)g_gm_gamedat_map_set[2];
-		gmMapSetDrawMapTvx(tvxamb, mP_HEADER, mD_HEADER, x, pos_y, gmMapTransX, 0f, 128f, false, mP_HEADER.blocks[0], mD_HEADER.blocks[0]);
+		gmMapSetDrawMapTvx(tvxamb, mP_HEADER, mD_HEADER, x, pos_y, gmMapTransX, 0f, 128f, true, mP_HEADER.blocks[0], mD_HEADER.blocks[0]);
 		gmMapExecuteDrawMapTvx(nNS_MATRIX, texlist);
 		if (gm_map_tex_draw_count > 0)
 		{
