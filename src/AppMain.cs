@@ -73460,6 +73460,10 @@ public class AppMain
 			oBS_CAMERA.prev_disp_pos.x = oBS_CAMERA.disp_pos.x;
 			oBS_CAMERA.prev_disp_pos.y = oBS_CAMERA.disp_pos.y;
 			oBS_CAMERA.prev_disp_pos.z = oBS_CAMERA.disp_pos.z;
+			if (i == 0)
+			{
+				GmScreenEdgeClamp(oBS_CAMERA);
+			}
 			if (oBS_CAMERA.user_func != null)
 			{
 				oBS_CAMERA.user_func(oBS_CAMERA);
@@ -141760,7 +141764,6 @@ public class AppMain
 
 	private static void GmCameraTruckFunc(OBS_CAMERA obj_camera)
 	{
-		GmScreenEdgeClamp(obj_camera);
 		NNS_VECTOR nNS_VECTOR = GlobalPool<NNS_VECTOR>.Alloc();
 		GMS_PLAYER_WORK gMS_PLAYER_WORK = g_gm_main_system.ply_work[0];
 		if ((gMS_PLAYER_WORK.player_flag & 0x400) != 0 && (gMS_PLAYER_WORK.player_flag & 0x10000) == 0)
