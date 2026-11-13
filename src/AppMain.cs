@@ -141746,8 +141746,8 @@ public class AppMain
 			if (sply != null && (sply.player_flag & 0x400) == 0)
 			{
 				float halfScr = Sonic4Ep1.RENDER_W * 0.5f; // ancho real de la pantalla en unidades del nivel (no depende del zoom)
-				int leftPx = (int)(obj_camera.disp_pos.x - halfScr) + 14;
-				int rightPx = (int)(obj_camera.disp_pos.x + halfScr) - 14;
+				int leftPx = (int)(obj_camera.disp_pos.x - halfScr) + SCREEN_EDGE_MARGIN;
+				int rightPx = (int)(obj_camera.disp_pos.x + halfScr) - SCREEN_EDGE_MARGIN;
 				if (sply.obj_work.pos.x >> 12 < leftPx)
 				{
 					sply.obj_work.pos.x = leftPx << 12;
@@ -148438,6 +148438,8 @@ public class AppMain
 	public const bool DISABLE_SCROLL_LIMITS = false;
 	// true: tope de Sonic en los bordes visibles de la pantalla (solo niveles).
 	public const bool SCREEN_EDGE_LIMITS = true;
+	// Margen desde el borde visible: mitad del ancho de Sonic + animacion, para que se vea completo.
+	public const int SCREEN_EDGE_MARGIN = 50;
 	// En arena de jefe la cámara NO se mueve: guarda su X al entrar y la mantiene. Sin clamps, Sonic no tiene topes.
 	private static bool arenaCamSaved;
 	private static float arenaCamX;
