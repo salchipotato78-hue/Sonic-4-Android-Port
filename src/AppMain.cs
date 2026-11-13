@@ -66901,9 +66901,7 @@ public class AppMain
 	// así la cámara puede llegar a los bordes del mapa y mostrar el escenario a los lados.
 	public static float GmCamHalfWidth()
 	{
-		// La proyeccion mapea GSD_DISP_HEIGHT unidades de mundo a GAME_H pixeles de alto; el ancho visible
-		// sigue esa misma escala. Con GAME_H = 288 y GSD_DISP_HEIGHT = 320 el ancho es RENDER_W/2 * 320/288.
-		return Sonic4Ep1.RENDER_W * 0.5f * (GSD_DISP_HEIGHT / (float)Sonic4Ep1.GAME_H);
+		return Sonic4Ep1.RENDER_W * 0.5f;
 	}
 
 	public static int GSD_DISP_WIDTH
@@ -67758,7 +67756,10 @@ public class AppMain
 
 	private static int objBlockColLimit(OBS_COL_CHK_DATA pData)
 	{
-		ColBlkX(out int bl, out int br);
+		if (REMOVE_PLAYER_WALLS)
+		{
+			return 1;
+		}
 		switch (pData.vec)
 		{
 		case 2:
@@ -67774,15 +67775,15 @@ public class AppMain
 			}
 			goto case 0;
 		case 0:
-			if (br - 1 < pData.pos_x)
+			if (_obj_bcol.right - 1 < pData.pos_x)
 			{
-				return br - 1 - pData.pos_x;
+				return _obj_bcol.right - 1 - pData.pos_x;
 			}
 			goto case 1;
 		case 1:
-			if (bl > pData.pos_x)
+			if (_obj_bcol.left > pData.pos_x)
 			{
-				return pData.pos_x - bl;
+				return pData.pos_x - _obj_bcol.left;
 			}
 			break;
 		}
@@ -80352,25 +80353,24 @@ public class AppMain
 	{
 		sbyte b = 0;
 		byte b2 = 0;
-		if ((ucSuf & 0x40) != 0)
+		if ((ucSuf & 0x40) != 0 && !REMOVE_PLAYER_WALLS)
 		{
-			ColLimitX(out int cl, out int cr);
-			if ((int)(lPosX & 0xFFFFFFF8u) > cr - 1 || lPosX < cl - 7)
+			if ((int)(lPosX & 0xFFFFFFF8u) > _obj_fcol.right - 1 || lPosX < _obj_fcol.left - 7)
 			{
 				// Fuera del mapa en modo limite: con WALL_OUT_OF_MAP la pared se conserva (evita que Sonic salga de la pantalla).
 				b = WALL_OUT_OF_MAP ? (sbyte)8 : (sbyte)0;
 			}
-			else if ((int)((lPosX & 0xFFFFFFF8u) + 8) > cr - 1)
+			else if ((int)((lPosX & 0xFFFFFFF8u) + 8) > _obj_fcol.right - 1)
 			{
-				b = (sbyte)((cr - 1) & 7);
+				b = (sbyte)((_obj_fcol.right - 1) & 7);
 				if (b == 0)
 				{
 					b = 8;
 				}
 			}
-			else if ((int)(lPosX & 0xFFFFFFF8u) < cl)
+			else if ((int)(lPosX & 0xFFFFFFF8u) < _obj_fcol.left)
 			{
-				b = (sbyte)(((cl & 7) == 0) ? 8 : ((sbyte)(8 + (8 - (cl & 7)))));
+				b = (sbyte)(((_obj_fcol.left & 7) == 0) ? 8 : ((sbyte)(8 + (8 - (_obj_fcol.left & 7)))));
 				b |= -16;
 				if (b == -8)
 				{
@@ -80378,7 +80378,7 @@ public class AppMain
 				}
 			}
 		}
-		else
+		else if ((ucSuf & 0x40) == 0)
 		{
 			lPosX = MTM_MATH_CLIP(lPosX, _obj_fcol.left, _obj_fcol.right - 1);
 			lPosY = MTM_MATH_CLIP(lPosY, _obj_fcol.top, _obj_fcol.bottom - 1);
@@ -80408,7 +80408,7 @@ public class AppMain
 	{
 		byte b = 0;
 		sbyte b2;
-		if ((ucSuf & 0x40) != 0)
+		if ((ucSuf & 0x40) != 0 && !REMOVE_PLAYER_WALLS)
 		{
 			if ((int)(lPosY & 0xFFFFFFF8u) > _obj_fcol.bottom - 1 || lPosY < _obj_fcol.top - 7)
 			{
@@ -88843,32 +88843,8 @@ public class AppMain
 	public static float diagLeftPx;
 	public static float diagRightPx;
 
-	private static string DiagScreenEdges()
-	{
-		float sl;
-		float sr;
-		GmScreenEdgeX(out sl, out sr);
-		return sl.ToString("0") + "/" + sr.ToString("0");
-	}
-
-	private static string DiagCamText()
-	{
-		OBS_CAMERA c = ObjCameraGet(g_obj.glb_camera_id);
-		if (c == null)
-		{
-			return "null";
-		}
-		return "pos.z=" + c.pos.z.ToString("0.0") + " disp.z=" + c.disp_pos.z.ToString("0.0") +
-			" scale=" + c.scale.ToString("0.000") + " M11=" + c.prj_pers_mtx.M11.ToString("0.000") +
-			" fovy=" + c.fovy;
-	}
-
 	public static string DiagLimitsText()
 	{
-		if (g_gm_main_system == null)
-		{
-			return "sin nivel";
-		}
 		GMS_PLAYER_WORK ply = g_gm_main_system.ply_work[0];
 		if (ply == null)
 		{
@@ -88882,89 +88858,14 @@ public class AppMain
 			"toques mapa izq=" + diagBlkMapL + " der=" + diagBlkMapR + "\n" +
 			"toques clamp izq=" + diagClampL + " der=" + diagClampR + "\n" +
 			"empuje pared=" + diagWallPush + "  seq=" + ply.seq_state + "\n" +
-			"move_flag=" + ((uint)ply.obj_work.move_flag).ToString("X") + "  fuera mapa=" + diagOutOfMap + "\n" +
-			"PANTALLA izq/der=" + DiagScreenEdges() + "\n" +
-			"TERRENO fcol izq/der=" + (_obj_fcol == null ? "null" : _obj_fcol.left + "/" + _obj_fcol.right) + "\n" +
-			"BLOQUES bcol izq/der=" + (_obj_bcol == null ? "null" : _obj_bcol.left + "/" + _obj_bcol.right) + "\n" +
-			"modo limite 0x80000=" + ((ply.obj_work.move_flag & 0x80000) != 0 ? "SI" : "no") + "\nCAM " + DiagCamText();
+			"move_flag=" + ((uint)ply.obj_work.move_flag).ToString("X") + "  fuera mapa=" + diagOutOfMap;
 	}
 
-	// Bordes visibles de la camara en X, en las mismas unidades que pos.x >> 12 y map_fcol.
-	private static bool ScreenCamReady()
-	{
-		return g_gm_main_system != null && ObjCameraGet(g_obj.glb_camera_id) != null;
-	}
-
-	private static void GmScreenEdgeX(out float left, out float right)
-	{
-		if (!ScreenCamReady())
-		{
-			left = g_gm_main_system != null ? g_gm_main_system.map_fcol.left : 0f;
-			right = g_gm_main_system != null ? g_gm_main_system.map_fcol.right : 0f;
-			return;
-		}
-		OBS_CAMERA cam = ObjCameraGet(g_obj.glb_camera_id);
-		float half = GmCamHalfWidth() * cam.scale;
-		left = cam.disp_pos.x - half;
-		right = cam.disp_pos.x + half;
-	}
-
-	// Topes de pantalla activos en todo el juego excepto fases especiales.
-	private static bool ScreenLimitActive()
-	{
-		return SCREEN_EDGE_LIMITS && ScreenCamReady() && !GSM_MAIN_STAGE_IS_SPSTAGE_NOT_RETRY();
-	}
-
-	// Bordes de pantalla como enteros para la colision de terreno en modo limite.
-	private static void ColLimitX(out int l, out int r)
-	{
-		if (ScreenLimitActive())
-		{
-			float sl;
-			float sr;
-			GmScreenEdgeX(out sl, out sr);
-			l = (int)Math.Floor(sl);
-			r = (int)Math.Ceiling(sr);
-		}
-		else
-		{
-			l = _obj_fcol.left;
-			r = _obj_fcol.right;
-		}
-	}
-
-	// Bordes de pantalla para los bloques de colision (objBlockColLimit).
-	private static void ColBlkX(out int l, out int r)
-	{
-		if (ScreenLimitActive())
-		{
-			float sl;
-			float sr;
-			GmScreenEdgeX(out sl, out sr);
-			l = (int)Math.Floor(sl);
-			r = (int)Math.Ceiling(sr);
-		}
-		else
-		{
-			l = _obj_bcol.left;
-			r = _obj_bcol.right;
-		}
-	}
+	// true: sin pared lateral al final del mapa; el suelo del borde se prolonga para que Sonic no caiga.
+	public const bool REMOVE_PLAYER_WALLS = true;
 
 	private static bool GmObjCheckMapLeftLimit(OBS_OBJECT_WORK obj_work, int ofst)
 	{
-		if (ScreenLimitActive())
-		{
-			float sl;
-			float sr;
-			GmScreenEdgeX(out sl, out sr);
-			bool hitS = (obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 <= sl + ofst;
-			if (hitS)
-			{
-				diagBlkMapL++;
-			}
-			return hitS;
-		}
 		bool raw = (obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 <= g_gm_main_system.map_fcol.left + ofst;
 		if (raw)
 		{
@@ -88979,18 +88880,6 @@ public class AppMain
 
 	private static bool GmObjCheckMapRightLimit(OBS_OBJECT_WORK obj_work, int ofst)
 	{
-		if (ScreenLimitActive())
-		{
-			float sl;
-			float sr;
-			GmScreenEdgeX(out sl, out sr);
-			bool hitS = (obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 >= sr - ofst;
-			if (hitS)
-			{
-				diagBlkMapR++;
-			}
-			return hitS;
-		}
 		bool raw = (obj_work.move_flag & 0xC) != 0 && obj_work.pos.x >> 12 >= g_gm_main_system.map_fcol.right - ofst;
 		if (raw)
 		{
@@ -142026,16 +141915,8 @@ public class AppMain
 		float num4 = (float)g_gm_main_system.map_fcol.top + (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		float num5 = (float)g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * obj_camera.scale;
 		obj_camera.disp_pos.x = CamArenaFix(obj_camera.disp_pos.x);
-		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x < num2)
-		{
-			obj_camera.disp_pos.x = num2;
-		}
-		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x > num3)
-		{
-			obj_camera.disp_pos.x = num3;
-		}
 		// Límite = borde visible de la pantalla, en todas las zonas (la cámara sigue igual; en arena queda fija).
-		if ((DISABLE_SCROLL_LIMITS || ScreenLimitActive()) && gMS_PLAYER_WORK != null)
+		if (DISABLE_SCROLL_LIMITS && gMS_PLAYER_WORK != null)
 		{
 			int halfW = (int)(GmCamHalfWidth() * obj_camera.scale);
 			int centerPx = (int)obj_camera.disp_pos.x;
@@ -142055,6 +141936,35 @@ public class AppMain
 				diagClampR++;
 				gMS_PLAYER_WORK.obj_work.pos.x = rightPx << 12;
 				gMS_PLAYER_WORK.obj_work.spd.x = 0;
+			}
+		}
+		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x < num2)
+		{
+			obj_camera.disp_pos.x = num2;
+		}
+		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x > num3)
+		{
+			obj_camera.disp_pos.x = num3;
+		}
+		// Tope de pantalla: Sonic no sale del encuadre visible. Solo niveles (no cinematicas ni fases especiales).
+		if (SCREEN_EDGE_LIMITS && g_gm_main_system != null && !GSM_MAIN_STAGE_IS_SPSTAGE_NOT_RETRY())
+		{
+			GMS_PLAYER_WORK sply = g_gm_main_system.ply_work[0];
+			if (sply != null && (sply.player_flag & 0x400) == 0)
+			{
+				float halfScr = Sonic4Ep1.RENDER_W * 0.5f * (GSD_DISP_HEIGHT / (float)Sonic4Ep1.GAME_H) * obj_camera.scale;
+				int leftPx = (int)(obj_camera.disp_pos.x - halfScr) + 14;
+				int rightPx = (int)(obj_camera.disp_pos.x + halfScr) - 14;
+				if (sply.obj_work.pos.x >> 12 < leftPx)
+				{
+					sply.obj_work.pos.x = leftPx << 12;
+					sply.obj_work.spd.x = 0;
+				}
+				else if (sply.obj_work.pos.x >> 12 > rightPx)
+				{
+					sply.obj_work.pos.x = rightPx << 12;
+					sply.obj_work.spd.x = 0;
+				}
 			}
 		}
 		if (obj_camera.disp_pos.y > 0f - num4)
@@ -148517,8 +148427,7 @@ public class AppMain
 	// EXPERIMENTO: true quita los topes horizontales de la cámara (límites de scroll en X).
 	// Si el jugador deja de pararse en los laterales, el origen es la cámara. Poner false para volver al comportamiento original.
 	public const bool DISABLE_SCROLL_LIMITS = false;
-	// true: los topes laterales de Sonic son los bordes visibles de la pantalla (no el rectangulo del mapa de 480 px).
-	// Sin paredes invisibles dentro de la pantalla y Sonic no sale por ningun lado. La camara conserva sus limites del nivel.
+	// true: tope de Sonic en los bordes visibles de la pantalla (solo niveles).
 	public const bool SCREEN_EDGE_LIMITS = true;
 	// En arena de jefe la cámara NO se mueve: guarda su X al entrar y la mantiene. Sin clamps, Sonic no tiene topes.
 	private static bool arenaCamSaved;
@@ -175901,7 +175810,7 @@ public class AppMain
 
 	private static bool gmPlySeqCheckWallPush(GMS_PLAYER_WORK ply_work)
 	{
-		if (!ScreenLimitActive() && (ply_work.obj_work.move_flag & 4) != 0 && (ply_work.player_flag & 0x8000) == 0 && (((ply_work.obj_work.disp_flag & 1) != 0 && GmPlayerKeyCheckWalkLeft(ply_work)) || ((ply_work.obj_work.disp_flag & 1) == 0 && GmPlayerKeyCheckWalkRight(ply_work))) && ply_work.obj_work.pos.x >> 12 > g_gm_main_system.map_fcol.left + 14 && ply_work.obj_work.pos.x >> 12 < g_gm_main_system.map_fcol.right - 14)
+		if ((ply_work.obj_work.move_flag & 4) != 0 && (ply_work.player_flag & 0x8000) == 0 && (((ply_work.obj_work.disp_flag & 1) != 0 && GmPlayerKeyCheckWalkLeft(ply_work)) || ((ply_work.obj_work.disp_flag & 1) == 0 && GmPlayerKeyCheckWalkRight(ply_work))) && ply_work.obj_work.pos.x >> 12 > g_gm_main_system.map_fcol.left + 14 && ply_work.obj_work.pos.x >> 12 < g_gm_main_system.map_fcol.right - 14)
 		{
 			diagWallPush++;
 			return GmPlySeqChangeSequence(ply_work, 18);
