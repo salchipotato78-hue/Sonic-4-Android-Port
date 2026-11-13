@@ -141732,8 +141732,35 @@ public class AppMain
 		nnCopyVector(obj_camera.disp_pos, oBS_CAMERA.disp_pos);
 	}
 
+	// Tope de pantalla: Sonic no sale del encuadre visible. Se ejecuta en TODOS los estados de cámara
+	// (incluido el modo fijo, flag & 1), porque GmCameraTruckFunc sale antes en ese modo.
+	private static void GmScreenEdgeClamp(OBS_CAMERA obj_camera)
+	{
+		if (SCREEN_EDGE_LIMITS && g_gm_main_system != null && !GSM_MAIN_STAGE_IS_SPSTAGE_NOT_RETRY())
+		{
+			GMS_PLAYER_WORK sply = g_gm_main_system.ply_work[0];
+			if (sply != null && (sply.player_flag & 0x400) == 0)
+			{
+				float halfScr = Sonic4Ep1.RENDER_W * 0.5f; // ancho real de la pantalla en unidades del nivel (no depende del zoom)
+				int leftPx = (int)(obj_camera.disp_pos.x - halfScr) + 14;
+				int rightPx = (int)(obj_camera.disp_pos.x + halfScr) - 14;
+				if (sply.obj_work.pos.x >> 12 < leftPx)
+				{
+					sply.obj_work.pos.x = leftPx << 12;
+					sply.obj_work.spd.x = 0;
+				}
+				else if (sply.obj_work.pos.x >> 12 > rightPx)
+				{
+					sply.obj_work.pos.x = rightPx << 12;
+					sply.obj_work.spd.x = 0;
+				}
+			}
+		}
+	}
+
 	private static void GmCameraTruckFunc(OBS_CAMERA obj_camera)
 	{
+		GmScreenEdgeClamp(obj_camera);
 		NNS_VECTOR nNS_VECTOR = GlobalPool<NNS_VECTOR>.Alloc();
 		GMS_PLAYER_WORK gMS_PLAYER_WORK = g_gm_main_system.ply_work[0];
 		if ((gMS_PLAYER_WORK.player_flag & 0x400) != 0 && (gMS_PLAYER_WORK.player_flag & 0x10000) == 0)
@@ -141945,27 +141972,6 @@ public class AppMain
 		if (!DISABLE_SCROLL_LIMITS && obj_camera.disp_pos.x > num3)
 		{
 			obj_camera.disp_pos.x = num3;
-		}
-		// Tope de pantalla: Sonic no sale del encuadre visible. Solo niveles (no cinematicas ni fases especiales).
-		if (SCREEN_EDGE_LIMITS && g_gm_main_system != null && !GSM_MAIN_STAGE_IS_SPSTAGE_NOT_RETRY())
-		{
-			GMS_PLAYER_WORK sply = g_gm_main_system.ply_work[0];
-			if (sply != null && (sply.player_flag & 0x400) == 0)
-			{
-				float halfScr = Sonic4Ep1.RENDER_W * 0.5f; // ancho real de la pantalla en unidades del nivel (no depende del zoom)
-				int leftPx = (int)(obj_camera.disp_pos.x - halfScr) + 14;
-				int rightPx = (int)(obj_camera.disp_pos.x + halfScr) - 14;
-				if (sply.obj_work.pos.x >> 12 < leftPx)
-				{
-					sply.obj_work.pos.x = leftPx << 12;
-					sply.obj_work.spd.x = 0;
-				}
-				else if (sply.obj_work.pos.x >> 12 > rightPx)
-				{
-					sply.obj_work.pos.x = rightPx << 12;
-					sply.obj_work.spd.x = 0;
-				}
-			}
 		}
 		if (obj_camera.disp_pos.y > 0f - num4)
 		{
