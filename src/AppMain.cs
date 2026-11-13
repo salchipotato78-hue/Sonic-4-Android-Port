@@ -141952,7 +141952,7 @@ public class AppMain
 			GMS_PLAYER_WORK sply = g_gm_main_system.ply_work[0];
 			if (sply != null && (sply.player_flag & 0x400) == 0)
 			{
-				float halfScr = Sonic4Ep1.RENDER_W * 0.5f * (GSD_DISP_HEIGHT / (float)Sonic4Ep1.GAME_H) * obj_camera.scale;
+				float halfScr = Sonic4Ep1.RENDER_W * 0.5f; // ancho real de la pantalla en unidades del nivel (no depende del zoom)
 				int leftPx = (int)(obj_camera.disp_pos.x - halfScr) + 14;
 				int rightPx = (int)(obj_camera.disp_pos.x + halfScr) - 14;
 				if (sply.obj_work.pos.x >> 12 < leftPx)
