@@ -148578,6 +148578,9 @@ public class AppMain
 	}
 
 	private const float FAR_2DBG_SCALE = 1.5f;
+	// Lost Labyrinth (stages 8-11): su fondo 2D lejano se escala más para cubrir los laterales de la pantalla ancha,
+	// como el de Casino Street. Sin probar en el teléfono: subir o bajar este valor según se vea.
+	private const float FAR_2DBG_SCALE_LABYRINTH = 2.0f;
 	private static void gmMapFarSceneObjFuncDraw2DBG(OBS_OBJECT_WORK pWork)
 	{
 		OBS_ACTION3D_NN_WORK obj_3d = pWork.obj_3d;
@@ -148649,9 +148652,10 @@ public class AppMain
 			break;
 		}
 		// FAR_2DBG_SCALE: escala del fondo 2D lejano. 1f = original. Sin probar en el teléfono.
-		if (FAR_2DBG_SCALE != 1f)
+		float far_2dbg_scale = (num >= 8 && num <= 11) ? FAR_2DBG_SCALE_LABYRINTH : FAR_2DBG_SCALE;
+		if (far_2dbg_scale != 1f)
 		{
-			nnScaleMatrix(obj_3d.user_obj_mtx, obj_3d.user_obj_mtx, FAR_2DBG_SCALE, FAR_2DBG_SCALE, FAR_2DBG_SCALE);
+			nnScaleMatrix(obj_3d.user_obj_mtx, obj_3d.user_obj_mtx, far_2dbg_scale, far_2dbg_scale, far_2dbg_scale);
 		}
 		ObjDrawAction3DNN(pWork.obj_3d, pWork.pos, pWork.dir, pWork.scale, ref pWork.disp_flag);
 	}
